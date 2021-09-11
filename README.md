@@ -7,6 +7,7 @@
 ## Example
 
 ```python
+
 from datetime import datetime
 from waybackmachine_cdx import WaybackMachineCDX
 
