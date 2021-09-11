@@ -4,6 +4,10 @@
 
 [WaybackMachine CDX](https://github.com/internetarchive/wayback/tree/master/wayback-cdx-server) code
 
+Modules:
+- CDX constructor
+- Iteration with resume key over the constructed CDX
+
 ## Example
 
 ```python
