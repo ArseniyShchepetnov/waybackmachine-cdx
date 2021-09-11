@@ -1,4 +1,4 @@
-"""URL constructor"""
+"""CDX query URL constructor."""
 import datetime
 from typing import Any, Dict, List, Optional
 
@@ -20,13 +20,16 @@ CDX_TO_DATETIME = 'to'
 CDX_FIELD_ORDER = 'fl'
 CDX_URL = 'url'
 
-CDX_LIST_SCOPES = ['exact', 'prefix', 'host', 'domain']
+CDX_LIST_MATCH_TYPES = ['exact', 'prefix', 'host', 'domain']
 CDX_LIST_OUTPUT_FORMATS = ['json']
 CDX_LIST_FIELD_ORDERS = ["urlkey", "timestamp", "original",
                          "mimetype", "statuscode", "digest", "length"]
 
 
 CDX_BASE = 'http://web.archive.org/cdx/search/'
+
+
+CDX_DATETIME_FORMAT = r'%Y%m%d%H%M%S'
 
 
 def cdx_construct(url: str,
@@ -48,8 +51,6 @@ class WaybackMachineCDX:
     """
     CDX request constructor for Wayback Machine.
     """
-
-    datetime_format = r'%Y%m%d%H%M%S'
 
     def __init__(self,
                  url: str,
@@ -126,9 +127,9 @@ class WaybackMachineCDX:
     def set_match_scope(self, scope: Optional[str] = None):
         """Set scope 'matchType' parameter."""
 
-        if scope is not None and scope not in CDX_LIST_SCOPES:
+        if scope is not None and scope not in CDX_LIST_MATCH_TYPES:
             raise ValueError(f"Scope is invalid {scope}. "
-                             f"Valid scopes: {CDX_LIST_SCOPES}. "
+                             f"Valid scopes: {CDX_LIST_MATCH_TYPES}. "
                              f"See {CDX_DOCS} for details")
 
         self.params[CDX_MATCH_TYPE] = scope
@@ -167,7 +168,7 @@ class WaybackMachineCDX:
         for name, val in zip(cdx_params, params):
 
             if val is not None:
-                val = val.strftime(self.datetime_format)
+                val = val.strftime(CDX_DATETIME_FORMAT)
                 self.params[name] = val
 
     def set_limits(self,
