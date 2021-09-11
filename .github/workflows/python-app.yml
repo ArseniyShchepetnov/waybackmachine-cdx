@@ -24,10 +24,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
+        python -m pip install pylint
+    - name: Lint with pylint
       run: |
         # stop the build if there are Python syntax errors or undefined names
         pylint --fail-under=8 waybackmachine_cdx 
-    - name: Test with pytest
+    - name: Test with unittest
       run: |
         unittest test
