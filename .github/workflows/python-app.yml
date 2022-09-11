@@ -31,4 +31,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          poetry run pytest . --cov=waybackmachine_cdx --cov-fail-under=90  --cov-report=term-missing
+          poetry run pytest . --cov=waybackmachine_cdx --cov-fail-under=70  --cov-report=term-missing
