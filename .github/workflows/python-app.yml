@@ -17,7 +17,9 @@ jobs:
         with:
           python-version: "3.7"
           cache: "poetry"
-      - run: poetry install
+      - run: |
+          poetry install
+          poetry run mypy --install-types
 
       - name: Lint with pylint
         run: |
