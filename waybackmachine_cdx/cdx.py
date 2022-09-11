@@ -56,14 +56,15 @@ class WaybackMachineCDX:
                  url: str,
                  match_type: Optional[str] = None,
                  output: Optional[str] = None,
-                 field_order: Optional[str] = None,
-                 from_dt: Optional[str] = None,
-                 to_dt: Optional[str] = None,
+                 field_order: Optional[List[str]] = None,
+                 from_dt: Optional[datetime.datetime] = None,
+                 to_dt: Optional[datetime.datetime] = None,
                  limits: Optional[int] = None,
                  fast_latest: Optional[bool] = None,
                  offset: Optional[int] = None,
                  resume_key: Optional[str] = None,
-                 show_resume_key: Optional[bool] = None):
+                 show_resume_key: Optional[bool] = None,
+                 timeout: int = 10):
         """
         Parameters
         ----------
@@ -73,11 +74,11 @@ class WaybackMachineCDX:
             Match type parameter, by default None
         output : Optional[str], optional
             Output formats, by default None
-        field_order : Optional[str], optional
+        field_order : Optional[List[str]], optional
             Field order, by default None
-        from_dt : Optional[str], optional
+        from_dt : Optional[datetime.datetime], optional
             Datetime start, by default None
-        to_dt : Optional[str], optional
+        to_dt : Optional[datetime.datetime], optional
             Datetime end, by default None
         limits : Optional[int], optional
             Limit number of tuples in response, by default None
@@ -93,14 +94,15 @@ class WaybackMachineCDX:
 
         self.url = url
 
-        self.params = {}
+        self.params: Dict[str, Any] = {}
 
         self.set_match_scope(match_type)
         self.set_output_format(output)
         self.set_field_order(field_order)
-        self.set_datatime_range(from_dt, to_dt)
+        self.set_datetime_range(from_dt, to_dt)
         self.set_limits(limits, fast_latest, offset)
-        self.set_resume_key(resume_key, show_resume_key)
+        self.set_resume_key(key=resume_key, show=show_resume_key)
+        self.timeout = timeout
 
     @property
     def cdx(self) -> str:
@@ -120,7 +122,7 @@ class WaybackMachineCDX:
 
         cdx = self.construct(params)
 
-        response = requests.get(cdx)
+        response = requests.get(cdx, timeout=self.timeout)
 
         return response.status_code == requests.codes.ok  # pylint: disable=maybe-no-member
 
@@ -143,9 +145,9 @@ class WaybackMachineCDX:
                 raise ValueError(f"Unknown items in 'fl': {unknown_items}. "
                                  f"Valid items: {CDX_LIST_FIELD_ORDERS}. "
                                  f"See {CDX_DOCS} for details")
-            field_order = ",".join(field_order)
+            order_list_str = ",".join(field_order)
 
-        self.params[CDX_FIELD_ORDER] = field_order
+        self.params[CDX_FIELD_ORDER] = order_list_str
 
     def set_output_format(self, output: Optional[str] = None):
         """Set output formats."""
@@ -157,19 +159,17 @@ class WaybackMachineCDX:
 
         self.params[CDX_OUTPUT_TYPE] = output
 
-    def set_datatime_range(self,
+    def set_datetime_range(self,
                            from_dt: Optional[datetime.datetime] = None,
                            to_dt: Optional[datetime.datetime] = None):
         """Set datetime range."""
-
         cdx_params = [CDX_FROM_DATETIME, CDX_TO_DATETIME]
         params = [from_dt, to_dt]
 
-        for name, val in zip(cdx_params, params):
-
-            if val is not None:
-                val = val.strftime(CDX_DATETIME_FORMAT)
-                self.params[name] = val
+        for name, value in zip(cdx_params, params):
+            if value is not None:
+                string_value = value.strftime(CDX_DATETIME_FORMAT)
+                self.params[name] = string_value
 
     def set_limits(self,
                    limit: Optional[int] = None,

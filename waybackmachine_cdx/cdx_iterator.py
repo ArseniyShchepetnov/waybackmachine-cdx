@@ -2,10 +2,11 @@
 import json
 import logging
 from collections.abc import Iterator
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 import requests
+
 from waybackmachine_cdx.cdx import WaybackMachineCDX
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,11 @@ class WaybackMachineIteratorCDX(Iterator):
     Iterator over WaybackMachine CDX results.
     """
 
-    def __init__(self, url: str, n_cached: int = 100, **kwargs):
+    def __init__(self,
+                 url: str,
+                 n_cached: int = 100,
+                 timeout: int = 10,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -36,6 +41,8 @@ class WaybackMachineIteratorCDX(Iterator):
         self._cached_data = None
         self._current_item = 0
 
+        self.timeout = timeout
+
     def __iter__(self) -> Iterator:
         return self
 
@@ -45,26 +52,23 @@ class WaybackMachineIteratorCDX(Iterator):
                 or self._current_item == self._cached_data.n_rows - 1):
 
             if self._cached_data is None:
-                self._cdx.set_resume_key(True, None)
+                self._cdx.set_resume_key(show=True, key=None)
             else:
 
                 if self._cached_data.resume_key is not None:
-                    self._cdx.set_resume_key(True,
-                                             self._cached_data.resume_key)
+                    self._cdx.set_resume_key(show=True,
+                                             key=self._cached_data.resume_key)
                 else:
                     logger.info("StopIteration")
                     raise StopIteration
 
-            response = requests.get(self._cdx.cdx)
-
+            response = requests.get(self._cdx.cdx, timeout=self.timeout)
             logger.info("Response status code %d", response.status_code)
 
             content = response.content
-
             logger.info("Response content length %d", len(content))
 
             json_data = json.loads(content)
-
             logger.info("Response content: %d rows", len(json_data))
 
             self._cached_data = WaybackMachineResponseCDX(json_data)
@@ -94,6 +98,8 @@ class WaybackMachineResponseCDX:
             Response result from the WaybackMachine
             as list of lists of strings.
         """
+        self._resume_key: Optional[str]
+
         if len(data[-2]) == 0:
 
             self._resume_key = data[-1][0]
@@ -105,7 +111,7 @@ class WaybackMachineResponseCDX:
             self._data = pd.DataFrame(data=data[1:], columns=data[0])
 
     @property
-    def resume_key(self) -> str:
+    def resume_key(self) -> Optional[str]:
         """WaybackMachine resume key property."""
         return self._resume_key
 
