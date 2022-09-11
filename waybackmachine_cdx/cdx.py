@@ -52,7 +52,7 @@ class WaybackMachineCDX:
     CDX request constructor for Wayback Machine.
     """
 
-    def __init__(self,
+    def __init__(self,  # pylint: disable=too-many-arguments
                  url: str,
                  match_type: Optional[str] = None,
                  output: Optional[str] = None,
