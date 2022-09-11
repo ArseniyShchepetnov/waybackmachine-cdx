@@ -27,7 +27,7 @@ jobs:
 
       - name: mypy checks
         run: |
-          poetry run mypy waybackmachine_cdx
+          poetry run mypy --ignore-missing-imports waybackmachine_cdx
 
       - name: Test with pytest
         run: |
