@@ -19,7 +19,6 @@ jobs:
           cache: "poetry"
       - run: |
           poetry install
-          poetry run mypy --install-types
 
       - name: Lint with pylint
         run: |
@@ -27,6 +26,7 @@ jobs:
 
       - name: mypy checks
         run: |
+          poetry run mypy --install-types
           poetry run mypy waybackmachine_cdx
 
       - name: Test with pytest
