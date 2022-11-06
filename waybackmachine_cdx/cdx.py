@@ -138,7 +138,6 @@ class WaybackMachineCDX:
 
     def set_field_order(self, field_order: Optional[List[str]] = None):
         """Set field order parameter"""
-
         if field_order is not None:
             unknown_items = list(set(field_order) - set(CDX_LIST_FIELD_ORDERS))
             if len(unknown_items) > 0:
@@ -146,8 +145,7 @@ class WaybackMachineCDX:
                                  f"Valid items: {CDX_LIST_FIELD_ORDERS}. "
                                  f"See {CDX_DOCS} for details")
             order_list_str = ",".join(field_order)
-
-        self.params[CDX_FIELD_ORDER] = order_list_str
+            self.params[CDX_FIELD_ORDER] = order_list_str
 
     def set_output_format(self, output: Optional[str] = None):
         """Set output formats."""
